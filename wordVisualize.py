@@ -48,12 +48,29 @@ FakeCommonWords = wordFreq.most_common(20)
 wordFreq = Counter(TrueText.split())
 TrueCommonWords = wordFreq.most_common(20)
 
-plot_wordfreq(FakeCommonWords, "Fake Common Words (Top 20)")
-plot_wordfreq(TrueCommonWords, "True Common Words (Top 20)")
+# plot_wordfreq(FakeCommonWords, "Fake Common Words (Top 20)")
+# plot_wordfreq(TrueCommonWords, "True Common Words (Top 20)")
 
 # PLOT MOST FREQUENT NGRAMS
 
+
 # PLOT TITLE LENGTH DISTRIBUTION
+FakeLens = Fakedf['title'].str.split()
+FakeLens = list(map(len, FakeLens))
+wordFreq = Counter(FakeLens)
+FakeLens = sorted(wordFreq.items())
+plot_wordfreq(FakeLens, "Fake Title Length Distribution")
+
+TrueLens = Truedf['title'].str.split()
+TrueLens = list(map(len, TrueLens))
+wordFreq = Counter(TrueLens)
+for i in range(16,31):
+    wordFreq[i] = 0
+TrueLens = sorted(wordFreq.items())
+plot_wordfreq(TrueLens, "True Title Length Distribution")
+
+print(FakeLens)
+print(TrueLens)
 
 # PLOT WORD LENGTH DISTRIBUTION
 
