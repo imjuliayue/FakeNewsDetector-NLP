@@ -7,8 +7,11 @@ Truedf = pd.read_csv('data/True.csv')
 Fakedf['true?'] = 0
 Truedf['true?'] = 1
 
+print(Fakedf['text'][1])
+
 # cleaning data
 import string
+import re
 import nltk
 nltk.download('stopwords')
 from nltk.corpus import stopwords
@@ -23,7 +26,8 @@ def clean_text(text):
     text = text.replace('\n', ' ')
     text = text.replace('\r', ' ')
     text = text.replace('\t', ' ')
-    text = text.translate(str.maketrans('', '', string.punctuation))
+    text = text.translate(str.maketrans({key : " " for key in string.punctuation}))
+    text = re.sub(r"\s+", " ", text).strip()
     words = [word for word in text.split() if word not in stop_words]
     text = ' '.join(words)
 
