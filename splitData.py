@@ -6,10 +6,13 @@ Truedf = pd.read_csv('data/True_cleaned.csv')
 
 combineddf = pd.concat([Fakedf, Truedf], ignore_index=True)
 
+# shuffle the dataset
 combineddf = combineddf.sample(frac=1, random_state=42).reset_index(drop=True)
 
+combineddf['input'] = 'ARTICLE_TITLE ' + combineddf['title'] + ' ARTICLE_BODY ' + combineddf['text'] + ' ARTICLE_SUBJECT ' + combineddf['subject']
+
 # Split the data into features and labels
-X = combineddf[['title', 'text', 'subject','date']]
+X = combineddf[['input']]
 y = combineddf['true?']
 
 # Split the data into training and testing sets
