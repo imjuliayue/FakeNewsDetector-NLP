@@ -6,4 +6,4 @@ def loadData(path, name):
   # returns a list of lists, each list is [name, descr1, descr2, ...]
   with open(f'{path}/{name}.csv', 'r') as f:
       reader = csv.reader(f)
-      return [row for row in reader]
+      return [row[0] for row in reader if row]

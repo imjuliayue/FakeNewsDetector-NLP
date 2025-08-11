@@ -15,6 +15,9 @@ Visualized data (better understanding of data)
 - Split data into train and test (80-20 split)
 
 ### Extracting Data Features
+- Count_Frequency (on 1d training data array)
+- Tfidf (Term Frequency – Inverse Document Frequency) (on CF output)
+  - Include TF and IDF formulas
 
 ### Logistic Regression
 
