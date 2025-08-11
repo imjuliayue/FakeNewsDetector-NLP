@@ -32,33 +32,29 @@ tfidf_transformer = TfidfTransformer()
 
 X_train_tfidf = tfidf_transformer.fit_transform(X_train_counts)
 '''
-
-# FITTING AND PREDICTING -----------------------------------------
+# KFOLD VALIDATION - OVERFITTING ANALYSIS -----------------------------------------
 from sklearn.linear_model import LogisticRegression
-from sklearn.pipeline import Pipeline
-from sklearn.model_selection import cross_validate
 
-# create pipeline (vectorize, then logistic regression on results)
-text_clf = Pipeline([("tfidf", TfidfVectorizer()),("logistic", LogisticRegression())])
+pipeline = [("tfidf", TfidfVectorizer()),("logistic", LogisticRegression())]
+
+# Expects labels to be int
+ytrain = [int(x) for x in ytrain]
+ytest = [int(x) for x in ytest]
+
+# OBTAIN ALL METRICS FOR THE LOGISTIC MODEL.
+pipelineAllMetrics(Xtrain,ytrain,Xtest,ytest,pipeline,"LogisticRegression/BOW",5)
+# kFoldAccuracyGraph(Xtrain,ytrain,pipeline, "LogisticRegression/BOW", 5)
 
 
-# simple fitting (Ignore)
-'''
-# train the data
-text_clf.fit(Xtrain,ytrain)
 
-# predict
-predictions = text_clf.predict(Xtest)
-'''
 
-# K-fold cross validation
-scoring = ["accuracy", "precision", "recall", "f1", "roc_auc"]
 
-ytrain = [int(x) for x in ytrain] # below function expects the values to be ints, not strings.
-scores = cross_validate(text_clf, Xtrain, ytrain, cv = 5, scoring=scoring, return_train_score=True)
 
-print(scores["train_accuracy"])
-print(scores["test_accuracy"])
+
+
+
+
+
 
 # CONFUSION MATRIX AND RESULTS ----------------------------------
 # from sklearn.metrics import confusion_matrix, classification_report, accuracy_score
