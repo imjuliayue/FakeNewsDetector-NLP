@@ -36,25 +36,41 @@ X_train_tfidf = tfidf_transformer.fit_transform(X_train_counts)
 # FITTING AND PREDICTING -----------------------------------------
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
+from sklearn.model_selection import cross_validate
 
 # create pipeline (vectorize, then logistic regression on results)
 text_clf = Pipeline([("tfidf", TfidfVectorizer()),("logistic", LogisticRegression())])
 
+
+# simple fitting (Ignore)
+'''
 # train the data
 text_clf.fit(Xtrain,ytrain)
 
 # predict
 predictions = text_clf.predict(Xtest)
+'''
+
+# K-fold cross validation
+scoring = ["accuracy", "precision", "recall", "f1", "roc_auc"]
+
+ytrain = [int(x) for x in ytrain] # below function expects the values to be ints, not strings.
+scores = cross_validate(text_clf, Xtrain, ytrain, cv = 5, scoring=scoring, return_train_score=True)
+
+print(scores["train_accuracy"])
+print(scores["test_accuracy"])
 
 # CONFUSION MATRIX AND RESULTS ----------------------------------
-from sklearn.metrics import confusion_matrix, classification_report, accuracy_score
+# from sklearn.metrics import confusion_matrix, classification_report, accuracy_score
 
-print("CONFUSION MATRIX:")
-print(confusion_matrix(ytest,predictions))
 
-print("CLASSIFICATION REPORT:")
-print(classification_report(ytest,predictions))
 
-print("ACCURACY SCORE:")
-print(accuracy_score(ytest, predictions))
+# print("CONFUSION MATRIX:")
+# print(confusion_matrix(ytest,predictions))
+
+# print("CLASSIFICATION REPORT:")
+# print(classification_report(ytest,predictions))
+
+# print("ACCURACY SCORE:")
+# print(accuracy_score(ytest, predictions))
 

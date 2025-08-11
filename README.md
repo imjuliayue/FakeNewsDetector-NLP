@@ -14,6 +14,13 @@ Visualized data (better understanding of data)
 
 - Split data into train and test (80-20 split)
 
+### About the Data
+around 44,300 total articles
+- about 23,500 fake articles
+- about 20,800 real articles
+
+Each article data contains the title, body, subject, and date.
+
 ### Extracting Data Features
 - Count_Frequency (on 1d training data array)
 - Tfidf (Term Frequency – Inverse Document Frequency) (on CF output)
