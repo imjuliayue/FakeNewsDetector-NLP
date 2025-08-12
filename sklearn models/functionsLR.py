@@ -22,20 +22,43 @@ def savePkl(FOLDERNAME, FILENAME, DATA):
    
   
 # K-fold cross validation FUNCTION
-def kFoldAccuracyGraph(Xtrain, ytrain, pipeline, FOLDERNAME, n_splits = 5):
+def learning_Curve(Xtrain, ytrain, pipeline, FOLDERNAME, train_sizes = np.linspace(0.1, 1.0, 5), n_splits = 5):
 
     skf = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=42)
 
-    metricsTrain = {"accuracy":[], "precision":[], "recall":[], "f1":[]}
-    metricsValid = {"accuracy":[], "precision":[], "recall":[], "f1":[]}
+    allMetricsTrain = {"accuracy":[], "precision":[], "recall":[], "f1":[]}
+    allMetricsValid = {"accuracy":[], "precision":[], "recall":[], "f1":[]}
 
-    # Split across k folds
-    for f, (trainInd, valInd) in enumerate(skf.split(Xtrain,ytrain),1):
+    lenData = len(ytrain)
+
+    # calculate accuracy, precision, recall, f1, ROC_AUC for different sized data.
+    for ratio in train_sizes:
+      print(f"Train size: {ratio}")
+
+      size = int(ratio * lenData)
+
+      metricsTrain = {"accuracy":[], "precision":[], "recall":[], "f1":[]}
+      metricsValid = {"accuracy":[], "precision":[], "recall":[], "f1":[]}
+
+      # Generate random sample of size
+      indices = np.arange(lenData)
+      np.random.seed(42)
+      np.random.shuffle(indices)
+
+      Xshuffled = [Xtrain[i] for i in indices]
+      yshuffled = [ytrain[i] for i in indices]
+
+      Xsubset = Xshuffled[:size]
+      ysubset = yshuffled[:size]
+
+
+      # Split across k folds
+      for f, (trainInd, valInd) in enumerate(skf.split(Xsubset,ysubset),1):
         print(f"Fold {f}")
 
         # Get the training and validation data for current fold
-        Xtraintrain,Xvalid = [Xtrain[i] for i in trainInd], [Xtrain[i] for i in valInd]
-        ytraintrain, yvalid = [ytrain[i] for i in trainInd], [ytrain[i] for i in valInd]
+        Xtraintrain,Xvalid = [Xsubset[i] for i in trainInd], [Xsubset[i] for i in valInd]
+        ytraintrain, yvalid = [ysubset[i] for i in trainInd], [ysubset[i] for i in valInd]
 
         # create new pipeline for each fold
         text_clf = Pipeline(pipeline)
@@ -57,24 +80,27 @@ def kFoldAccuracyGraph(Xtrain, ytrain, pipeline, FOLDERNAME, n_splits = 5):
         metricsValid["precision"].append(precision_score(yvalid, yValidPred))
         metricsValid["recall"].append(recall_score(yvalid, yValidPred))
         metricsValid["f1"].append(f1_score(yvalid, yValidPred))
+      
+      for metric in metricsTrain.keys():
+          allMetricsTrain[metric].append(np.mean(metricsTrain[metric]))
+          allMetricsValid[metric].append(np.mean(metricsValid[metric]))
 
     # PLOT THE METRICS ACROSS EACH FOLD
-    folds = range(1,n_splits + 1)
     plt.figure(figsize=(12,8))
 
     for metric in metricsTrain.keys():
-      plt.plot(folds, metricsTrain[metric], marker = 'o', linestyle = "--", label=f"Train {metric}")
-      plt.plot(folds, metricsValid[metric], marker = 'x', label=f"Valid {metric}")
-      plt.xlabel('Fold')
+      plt.plot(train_sizes, allMetricsTrain[metric], marker = 'o', linestyle = "--", label=f"Train {metric}")
+      plt.plot(train_sizes, allMetricsValid[metric], marker = 'x', label=f"Valid {metric}")
+      plt.xlabel('Training Set Size')
       plt.ylabel('Score')
       plt.title(f'Training vs Validation {metric}-score per Fold')
-      plt.ylim(0.9, 1.05)
-      plt.xticks(folds)
+      plt.ylim(0, 1.05)
+      plt.xticks(train_sizes)
       plt.legend()
       plt.grid(True)
 
       folderpath = f"./results/{FOLDERNAME}/"
-      filename = f"{n_splits}Fold-{metric}_scores.png"
+      filename = f"LearningCurve-{metric}_scores.png"
       os.makedirs(folderpath, exist_ok=True)
       plt.savefig(os.path.join(folderpath,filename))
 
@@ -138,9 +164,11 @@ def trainWithMetrics(Xtrain,ytrain,Xtest,ytest,pipeline, FOLDERNAME):
   return AllMetrics
 
 def pipelineAllMetrics(Xtrain,ytrain,Xtest,ytest,pipeline,FOLDERNAME,n_splits=5):
-   kFoldAccuracyGraph(Xtrain,ytrain,pipeline,FOLDERNAME,n_splits=n_splits)
+   
+  print("Beginning learning curve")
+  learning_Curve(Xtrain,ytrain,pipeline,FOLDERNAME,n_splits=n_splits)
 
-   return trainWithMetrics(Xtrain,ytrain,Xtest,ytest,pipeline,FOLDERNAME)
+  return trainWithMetrics(Xtrain,ytrain,Xtest,ytest,pipeline,FOLDERNAME)
 
     
 
