@@ -225,8 +225,9 @@ class TextMetadataTransformer(BaseEstimator, TransformerMixin):
   
   def fit(self, X, y=None):
       for x in X:
-        parts = re.split(r'\s*(ARTICLE_TITLE|ARTICLE_BODY|ARTICLE_SUBJECT)\s*',x)
-        subject = parts[2]
+        print(x)
+        parts = re.split(r'(ARTICLE_TITLE\s|\sARTICLE_BODY\s|\sARTICLE_SUBJECT\s)',x)
+        subject = parts[6]
         if(subject not in self.dic):
            self.dic[subject] = self.numSubject
            self.numSubject += 1
@@ -236,10 +237,10 @@ class TextMetadataTransformer(BaseEstimator, TransformerMixin):
   def transform(self, X):
     features = []
     for x in X:
-      parts = re.split(r'\s*(ARTICLE_TITLE|ARTICLE_BODY|ARTICLE_SUBJECT)\s*',x)
-      title = parts[0]
-      body = parts[1]
-      subject = parts[2]
+      parts = re.split(r'(\sARTICLE_TITLE\s|\sARTICLE_BODY\s|\sARTICLE_SUBJECT\s)',x)
+      title = parts[2]
+      body = parts[4]
+      subject = parts[6]
       fts = [len(title), len(title.split(" ")), len(body), len(body.split(" ")), self.dic["OTHER"] if subject not in self.dic else self.dic[subject]]
       features.append(fts)
     return features

@@ -2,10 +2,10 @@ from functionsLR import *
 
 # Load in the data
 print("loading data...")
-Xtrain = loadDataUTF8("data/Vader", "X_train")
-ytrain = loadData("data/Vader", "y_train")
-Xtest = loadDataUTF8("data/Vader", "X_test")
-ytest = loadData("data/Vader", "y_test")
+Xtrain = loadDataUTF8("data", "X_trainC")
+ytrain = loadData("data", "y_trainC")
+Xtest = loadDataUTF8("data", "X_testC")
+ytest = loadData("data", "y_testC")
 
 # Pipelines expect numeric values
 ytrain = [int(y) for y in ytrain]
