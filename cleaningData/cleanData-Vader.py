@@ -57,6 +57,6 @@ Truedf['subject'] = Truedf['subject'].apply(clean_text)
 
 print("saving cleaned data")
 
-Fakedf.to_csv('data/Fake_cleaned.csv', index=False)
-Truedf.to_csv('data/True_cleaned.csv', index=False)
+Fakedf.to_csv('data/Fake_cleaned_Vader.csv', index=False)
+Truedf.to_csv('data/True_cleaned_Vader.csv', index=False)
 
