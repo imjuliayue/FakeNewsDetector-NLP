@@ -32,7 +32,7 @@ tfidf_transformer = TfidfTransformer()
 
 X_train_tfidf = tfidf_transformer.fit_transform(X_train_counts)
 '''
-# KFOLD VALIDATION - OVERFITTING ANALYSIS -----------------------------------------
+# LOGISTIC REGRESSION -----------------------------------------
 from sklearn.linear_model import LogisticRegression
 
 pipeline = [("tfidf", TfidfVectorizer()),("logistic", LogisticRegression())]
@@ -42,8 +42,20 @@ ytrain = [int(x) for x in ytrain]
 ytest = [int(x) for x in ytest]
 
 # OBTAIN ALL METRICS FOR THE LOGISTIC MODEL.
-pipelineAllMetrics(Xtrain,ytrain,Xtest,ytest,pipeline,"LogisticRegression/BOW",5)
-# kFoldAccuracyGraph(Xtrain,ytrain,pipeline, "LogisticRegression/BOW", 5)
+# pipelineAllMetrics(Xtrain,ytrain,Xtest,ytest,pipeline,"LogisticRegression/BOW",n_splits=5)
+
+# LINEAR SVC -------------------------------------------------------------
+from sklearn.svm import LinearSVC
+
+pipeline = [("tfidf", TfidfVectorizer()), ("SVM", LinearSVC())]
+
+pipelineAllMetrics(Xtrain,ytrain,Xtest,ytest,pipeline,"LinearSVC/BOW",n_splits=5)
+
+
+
+# N-GRAMS ------------------------------------------------------------------------
+
+# TEXT LENGTH
 
 
 

@@ -163,11 +163,12 @@ def trainWithMetrics(Xtrain,ytrain,Xtest,ytest,pipeline, FOLDERNAME):
   savePkl(FOLDERNAME,"AllMetrics", AllMetrics)
   return AllMetrics
 
-def pipelineAllMetrics(Xtrain,ytrain,Xtest,ytest,pipeline,FOLDERNAME,n_splits=5):
+def pipelineAllMetrics(Xtrain,ytrain,Xtest,ytest,pipeline,FOLDERNAME, training_size = np.linspace(0.1,1.0,5),n_splits=5):
    
   print("Beginning learning curve")
-  learning_Curve(Xtrain,ytrain,pipeline,FOLDERNAME,n_splits=n_splits)
+  learning_Curve(Xtrain,ytrain,pipeline,FOLDERNAME,training_size,n_splits)
 
+  print("Getting training metrics")
   return trainWithMetrics(Xtrain,ytrain,Xtest,ytest,pipeline,FOLDERNAME)
 
     
