@@ -8,7 +8,7 @@ def saveData(path, name, data):
   # data is in the form of [[name, descr1, descr2, ...], [name2, descr1, descr2, ...], ...]
   # saves as CSV file with name as the first column and descriptions as the rest
   with open(f'{path}/{name}.csv', 'w', newline='',encoding='utf-8') as f:
-      writer = csv.writer(f)
+      writer = csv.writer(f,delimiter='\t')
       writer.writerows(data)
 
 Fakedf = pd.read_csv('data/Vader/Fake_cleaned_Vader.csv')
