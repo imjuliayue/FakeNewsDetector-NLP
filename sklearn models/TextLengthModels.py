@@ -16,7 +16,7 @@ ytest = [int(y) for y in ytest]
 # Logistic regression
 from sklearn.linear_model import LogisticRegression
 
-pipeline = [("TextMetadata", TextMetadataTransformer()),("LogReg",LogisticRegression())]
+pipeline = [("TextMetadata", TextMetadataTransformer()),("LogReg",LogisticRegression(max_iter=500))]
 
 print(pipelineAllMetrics(Xtrain,ytrain,Xtest,ytest,pipeline,"LogisticRegression/TextMetadata",n_splits=3))
 

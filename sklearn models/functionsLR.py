@@ -42,7 +42,7 @@ def learning_Curve(Xtrain, ytrain, pipeline, FOLDERNAME, train_sizes = np.linspa
 
     # calculate accuracy, precision, recall, f1, ROC_AUC for different sized data.
     sizes = []
-    for ratio in train_sizes:
+    for k, ratio in enumerate(train_sizes):
       print(f"Train size: {ratio}")
 
       size = int(ratio * lenData)
@@ -53,7 +53,7 @@ def learning_Curve(Xtrain, ytrain, pipeline, FOLDERNAME, train_sizes = np.linspa
 
       # Generate random sample of size
       indices = np.arange(lenData)
-      np.random.seed(42)
+      np.random.seed(42 + k)
       np.random.shuffle(indices)
 
       Xshuffled = [Xtrain[i] for i in indices]
@@ -73,7 +73,7 @@ def learning_Curve(Xtrain, ytrain, pipeline, FOLDERNAME, train_sizes = np.linspa
         ytraintrain, yvalid = [ysubset[i] for i in trainInd], [ysubset[i] for i in valInd]
 
         # create new pipeline for each fold
-        text_clf = Pipeline(deepcopy(pipeline))
+        text_clf = Pipeline([(name, deepcopy(model)) for (name, model) in pipeline])
 
         # train the model
         text_clf.fit(Xtraintrain, ytraintrain)
@@ -84,14 +84,14 @@ def learning_Curve(Xtrain, ytrain, pipeline, FOLDERNAME, train_sizes = np.linspa
 
         # Store metrics for further analysis
         metricsTrain["accuracy"].append( accuracy_score(ytraintrain, yTrainPred))
-        metricsTrain["precision"].append(precision_score(ytraintrain, yTrainPred,zero_division = 0))
-        metricsTrain["recall"].append(recall_score(ytraintrain, yTrainPred,zero_division = 0))
-        metricsTrain["f1"].append(f1_score(ytraintrain, yTrainPred,zero_division = 0))
+        metricsTrain["precision"].append(precision_score(ytraintrain, yTrainPred,average="weighted"))
+        metricsTrain["recall"].append(recall_score(ytraintrain, yTrainPred,average="weighted"))
+        metricsTrain["f1"].append(f1_score(ytraintrain, yTrainPred,average="weighted"))
 
         metricsValid["accuracy"].append(accuracy_score(yvalid, yValidPred))
-        metricsValid["precision"].append(precision_score(yvalid, yValidPred,zero_division = 0))
-        metricsValid["recall"].append(recall_score(yvalid, yValidPred,zero_division = 0))
-        metricsValid["f1"].append(f1_score(yvalid, yValidPred,zero_division = 0))
+        metricsValid["precision"].append(precision_score(yvalid, yValidPred,average="weighted"))
+        metricsValid["recall"].append(recall_score(yvalid, yValidPred,average="weighted"))
+        metricsValid["f1"].append(f1_score(yvalid, yValidPred,average="weighted"))
       
       for metric in metricsTrain.keys():
           allMetricsTrain[metric].append(np.mean(metricsTrain[metric]))
@@ -148,9 +148,9 @@ def trainWithMetrics(Xtrain,ytrain,Xtest,ytest,pipeline, FOLDERNAME):
 
   # metrics
   accScore = accuracy_score(ytest,predictions)
-  precScore = precision_score(ytest,predictions,zero_division = 0)
-  recScore = recall_score(ytest,predictions,zero_division = 0)
-  f1Score = f1_score(ytest,predictions,zero_division = 0)
+  precScore = precision_score(ytest,predictions,average="weighted")
+  recScore = recall_score(ytest,predictions,average="weighted")
+  f1Score = f1_score(ytest,predictions,average="weighted")
 
   ROC_AUC = roc_auc_score(ytest, predictionProbs)
   fpr, tpr, threshold = roc_curve(ytest,predictionProbs)
@@ -225,9 +225,9 @@ class TextMetadataTransformer(BaseEstimator, TransformerMixin):
   
   def fit(self, X, y=None):
       for x in X:
-        print(x)
-        parts = re.split(r'(ARTICLE_TITLE\s|\sARTICLE_BODY\s|\sARTICLE_SUBJECT\s)',x)
-        subject = parts[6]
+        parts = re.split(r'ARTICLE_TITLE\s|\sARTICLE_BODY\s|\sARTICLE_SUBJECT\s',x)
+        parts = [l for l in parts if l != ""]
+        subject = parts[2]
         if(subject not in self.dic):
            self.dic[subject] = self.numSubject
            self.numSubject += 1
@@ -237,10 +237,11 @@ class TextMetadataTransformer(BaseEstimator, TransformerMixin):
   def transform(self, X):
     features = []
     for x in X:
-      parts = re.split(r'(\sARTICLE_TITLE\s|\sARTICLE_BODY\s|\sARTICLE_SUBJECT\s)',x)
-      title = parts[2]
-      body = parts[4]
-      subject = parts[6]
+      parts = re.split(r'\sARTICLE_TITLE\s|\sARTICLE_BODY\s|\sARTICLE_SUBJECT\s',x)
+      parts = [l for l in parts if l != ""]
+      title = parts[0]
+      body = parts[1]
+      subject = parts[2]
       fts = [len(title), len(title.split(" ")), len(body), len(body.split(" ")), self.dic["OTHER"] if subject not in self.dic else self.dic[subject]]
       features.append(fts)
     return features
