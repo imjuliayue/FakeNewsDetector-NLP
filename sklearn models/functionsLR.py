@@ -194,7 +194,7 @@ def pipelineAllMetrics(Xtrain,ytrain,Xtest,ytest,pipeline,FOLDERNAME, training_s
   print("Getting training metrics")
   return trainWithMetrics(Xtrain,ytrain,Xtest,ytest,pipeline,FOLDERNAME)
 
-# VADER SENTIMENT ANALYSIS MODEL ---------------------------------------------------------------
+# CUSTOM PIPELINE MODELS ---------------------------------------------------------------
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from sklearn.base import BaseEstimator,TransformerMixin
 
@@ -215,6 +215,34 @@ class VADERTransformer(BaseEstimator, TransformerMixin):
             polarities = self.analyzer.polarity_scores(x)
             scores.append([polarities[key] for key in ['pos','neg','neu','compound']])
         return np.array(scores)
+
+class TextMetadataTransformer(BaseEstimator, TransformerMixin):
+  def __init__(self):
+      # dictionary mapping subject => number
+      self.dic = {}
+      self.numSubject = 1
+  
+  def fit(self, X, y=None):
+      for x in X:
+        parts = x.split("ARTICLE_TITLE "," ARTICLE_BODY ", " ARTICLE_SUBJECT ")
+        subject = parts[2]
+        if(subject not in self.dic):
+           self.dic[subject] = self.numSubject
+           self.numSubject += 1
+        self.dic["OTHER"] = self.numSubject
+      return self
+  
+  def transform(self, X):
+    features = []
+    for x in X:
+      parts = x.split("ARTICLE_TITLE "," ARTICLE_BODY ", " ARTICLE_SUBJECT ")
+      title = parts[0]
+      body = parts[1]
+      subject = parts[2]
+      fts = [len(title), len(title.split(" ")), len(body), len(body.split(" ")), self.dic["OTHER"] if subject not in self.dic else self.dic[subject]]
+      features.append(fts)
+    return features
+
 
     
 
