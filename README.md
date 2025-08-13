@@ -32,7 +32,18 @@ Each article data contains the title, body, subject, and date.
     - each data point basically has an m-vector where the ith entry is TF-IDF score of the ith word in dictionary for that document
 
 ##### Sentiment Analysis
+- VADER (Valence Aware Dictionary for sEntiment Reasoning) - text sentiment analysis that determines positive/negative language and strength or intensity of language
+  - Part of NLTK package (apply directly on unlabeled data)
+  - Maps lexical features to emotion intensities (in the form of sentiment score); full score of text is determined by summing up all of the scores
+  - Understands negation (e.g. not love is negative)
+  - Understands capitalization and punctuation (which has been cleaned out)
+  - Limitations: cannot capture individual instances of positive/negative sentiment in the same text (only one score represents it)
+    - Cannot capture sarcasm
 
+##### NGrams (Sizes 1-3)
+- Very similar to BOW, uses Count Frequency and TFIDF, but this time takes groups of these words and uses them as features (TFIDF).
+- This model is usually much higher performing than BOW, since they are able to capture meanings of groups of words and therefore better at limitedly capturing sentiment.
+- Removed features that appear in < 0.2% of documents and > 90% of documents.
 
 ### Logistic Regression
 
@@ -46,3 +57,4 @@ To do:
 - Fine tune better models
 
 
++
