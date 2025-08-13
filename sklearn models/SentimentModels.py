@@ -29,4 +29,4 @@ ytest = [int(y) for y in ytest]
 from sklearn.linear_model import LogisticRegression
 pipeline = [("VADERSentiments", VADERTransformer()),("LogisticRegr",LogisticRegression())]
 
-pipelineAllMetrics(Xtrain,ytrain,Xtest,ytest,pipeline,"LogisticRegression/Sentiment",n_splits=2)
+pipelineAllMetrics(Xtrain,ytrain,Xtest,ytest,pipeline,"LogisticRegression/Sentiment",n_splits=3)

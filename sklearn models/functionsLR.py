@@ -53,7 +53,10 @@ def learning_Curve(Xtrain, ytrain, pipeline, FOLDERNAME, train_sizes = np.linspa
       metricsValid = {"accuracy":[], "precision":[], "recall":[], "f1":[]}
 
       # Generate random sample of size
-      Xsubset,_,ysubset, _ = train_test_split(Xtrain,ytrain,train_size=ratio,stratify=ytrain,random_state=42)
+      Xsubset,ysubset = Xtrain, ytrain
+      
+      if ratio < 1:
+        Xsubset,_,ysubset, _ = train_test_split(Xtrain,ytrain,train_size=ratio,stratify=ytrain,random_state=42)
 
       # Split across k folds
       skf = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=42)
