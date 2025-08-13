@@ -15,6 +15,14 @@ def loadData(path, name):
       reader = csv.reader(f)
       return [row[0] for row in reader if row]
   
+def loadDataUTF8(path, name):
+  # path is the path to load the data from (can include '../'), W.R.T. WHERE RUNNING SCRIPT
+  # name is the name of the file to load
+  # returns a list of lists, each list is [name, descr1, descr2, ...]
+  with open(f'{path}/{name}.csv', 'r',encoding='utf-8') as f:
+      reader = csv.reader(f)
+      return [row[0] for row in reader if row]
+  
 def savePkl(FOLDERNAME, FILENAME, DATA):
     # PATHWAY IS W.R.T. WHERE RUNNING SCRIPT
     with open(f"results/{FOLDERNAME}/{FILENAME}.pkl", 'wb') as f:
@@ -93,7 +101,7 @@ def learning_Curve(Xtrain, ytrain, pipeline, FOLDERNAME, train_sizes = np.linspa
       plt.plot(train_sizes, allMetricsValid[metric], marker = 'x', label=f"Valid {metric}")
       plt.xlabel('Training Set Size')
       plt.ylabel('Score')
-      plt.title(f'Training vs Validation {metric}-score per Fold')
+      plt.title(f'Training vs Validation {metric}-score per dataset size')
       plt.ylim(0, 1.05)
       plt.xticks(train_sizes)
       plt.legend()
