@@ -2,6 +2,7 @@ import csv
 import os
 import matplotlib.pyplot as plt
 import numpy as np
+import re
 from sklearn.model_selection import StratifiedKFold
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, roc_curve, confusion_matrix
@@ -83,14 +84,14 @@ def learning_Curve(Xtrain, ytrain, pipeline, FOLDERNAME, train_sizes = np.linspa
 
         # Store metrics for further analysis
         metricsTrain["accuracy"].append( accuracy_score(ytraintrain, yTrainPred))
-        metricsTrain["precision"].append(precision_score(ytraintrain, yTrainPred))
-        metricsTrain["recall"].append(recall_score(ytraintrain, yTrainPred))
-        metricsTrain["f1"].append(f1_score(ytraintrain, yTrainPred))
+        metricsTrain["precision"].append(precision_score(ytraintrain, yTrainPred,zero_division = 0))
+        metricsTrain["recall"].append(recall_score(ytraintrain, yTrainPred,zero_division = 0))
+        metricsTrain["f1"].append(f1_score(ytraintrain, yTrainPred,zero_division = 0))
 
         metricsValid["accuracy"].append(accuracy_score(yvalid, yValidPred))
-        metricsValid["precision"].append(precision_score(yvalid, yValidPred))
-        metricsValid["recall"].append(recall_score(yvalid, yValidPred))
-        metricsValid["f1"].append(f1_score(yvalid, yValidPred))
+        metricsValid["precision"].append(precision_score(yvalid, yValidPred,zero_division = 0))
+        metricsValid["recall"].append(recall_score(yvalid, yValidPred,zero_division = 0))
+        metricsValid["f1"].append(f1_score(yvalid, yValidPred,zero_division = 0))
       
       for metric in metricsTrain.keys():
           allMetricsTrain[metric].append(np.mean(metricsTrain[metric]))
@@ -147,9 +148,9 @@ def trainWithMetrics(Xtrain,ytrain,Xtest,ytest,pipeline, FOLDERNAME):
 
   # metrics
   accScore = accuracy_score(ytest,predictions)
-  precScore = precision_score(ytest,predictions)
-  recScore = recall_score(ytest,predictions)
-  f1Score = f1_score(ytest,predictions)
+  precScore = precision_score(ytest,predictions,zero_division = 0)
+  recScore = recall_score(ytest,predictions,zero_division = 0)
+  f1Score = f1_score(ytest,predictions,zero_division = 0)
 
   ROC_AUC = roc_auc_score(ytest, predictionProbs)
   fpr, tpr, threshold = roc_curve(ytest,predictionProbs)
@@ -224,7 +225,7 @@ class TextMetadataTransformer(BaseEstimator, TransformerMixin):
   
   def fit(self, X, y=None):
       for x in X:
-        parts = x.split("ARTICLE_TITLE "," ARTICLE_BODY ", " ARTICLE_SUBJECT ")
+        parts = re.split(r'\s*(ARTICLE_TITLE|ARTICLE_BODY|ARTICLE_SUBJECT)\s*',x)
         subject = parts[2]
         if(subject not in self.dic):
            self.dic[subject] = self.numSubject
@@ -235,7 +236,7 @@ class TextMetadataTransformer(BaseEstimator, TransformerMixin):
   def transform(self, X):
     features = []
     for x in X:
-      parts = x.split("ARTICLE_TITLE "," ARTICLE_BODY ", " ARTICLE_SUBJECT ")
+      parts = re.split(r'\s*(ARTICLE_TITLE|ARTICLE_BODY|ARTICLE_SUBJECT)\s*',x)
       title = parts[0]
       body = parts[1]
       subject = parts[2]
