@@ -5,6 +5,7 @@ import numpy as np
 import re
 from sklearn.model_selection import StratifiedKFold
 from sklearn.pipeline import Pipeline
+from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, roc_curve, confusion_matrix
 import pickle as pkl
 from copy import deepcopy
@@ -52,16 +53,7 @@ def learning_Curve(Xtrain, ytrain, pipeline, FOLDERNAME, train_sizes = np.linspa
       metricsValid = {"accuracy":[], "precision":[], "recall":[], "f1":[]}
 
       # Generate random sample of size
-      indices = np.arange(lenData)
-      np.random.seed(42 + k)
-      np.random.shuffle(indices)
-
-      Xshuffled = [Xtrain[i] for i in indices]
-      yshuffled = [ytrain[i] for i in indices]
-
-      Xsubset = Xshuffled[:size]
-      ysubset = yshuffled[:size]
-
+      Xsubset,_,ysubset, _ = train_test_split(Xtrain,ytrain,train_size=ratio,stratify=ytrain,random_state=42)
 
       # Split across k folds
       skf = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=42)
