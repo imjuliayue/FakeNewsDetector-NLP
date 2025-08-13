@@ -42,14 +42,14 @@ ytrain = [int(x) for x in ytrain]
 ytest = [int(x) for x in ytest]
 
 # OBTAIN ALL METRICS FOR THE LOGISTIC MODEL.
-# pipelineAllMetrics(Xtrain,ytrain,Xtest,ytest,pipeline,"LogisticRegression/BOW",n_splits=5)
+pipelineAllMetrics(Xtrain,ytrain,Xtest,ytest,pipeline,"LogisticRegression/BOW",n_splits=3)
 
 # LINEAR SVC -------------------------------------------------------------
 from sklearn.svm import LinearSVC
 
 pipeline = [("tfidf", TfidfVectorizer()), ("SVM", LinearSVC())]
 
-pipelineAllMetrics(Xtrain,ytrain,Xtest,ytest,pipeline,"LinearSVC/BOW",n_splits=5)
+# pipelineAllMetrics(Xtrain,ytrain,Xtest,ytest,pipeline,"LinearSVC/BOW",n_splits=5)
 
 
 

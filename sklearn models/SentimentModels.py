@@ -52,4 +52,4 @@ class VADERTransformer(BaseEstimator, TransformerMixin):
 from sklearn.linear_model import LogisticRegression
 pipeline = [("VADERSentiments", VADERTransformer()),("LogisticRegr",LogisticRegression())]
 
-pipelineAllMetrics()
+pipelineAllMetrics(Xtrain,ytrain,Xtest,ytest,pipeline,"LogisticRegression/Sentiment",n_splits=2)

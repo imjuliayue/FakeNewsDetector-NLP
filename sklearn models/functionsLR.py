@@ -6,6 +6,7 @@ from sklearn.model_selection import StratifiedKFold
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, roc_curve, confusion_matrix
 import pickle as pkl
+from copy import deepcopy
 
 def loadData(path, name):
   # path is the path to load the data from (can include '../'), W.R.T. WHERE RUNNING SCRIPT
@@ -32,7 +33,6 @@ def savePkl(FOLDERNAME, FILENAME, DATA):
 # K-fold cross validation FUNCTION
 def learning_Curve(Xtrain, ytrain, pipeline, FOLDERNAME, train_sizes = np.linspace(0.1, 1.0, 5), n_splits = 5):
 
-    skf = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=42)
 
     allMetricsTrain = {"accuracy":[], "precision":[], "recall":[], "f1":[]}
     allMetricsValid = {"accuracy":[], "precision":[], "recall":[], "f1":[]}
@@ -40,10 +40,12 @@ def learning_Curve(Xtrain, ytrain, pipeline, FOLDERNAME, train_sizes = np.linspa
     lenData = len(ytrain)
 
     # calculate accuracy, precision, recall, f1, ROC_AUC for different sized data.
+    sizes = []
     for ratio in train_sizes:
       print(f"Train size: {ratio}")
 
       size = int(ratio * lenData)
+      sizes.append(size)
 
       metricsTrain = {"accuracy":[], "precision":[], "recall":[], "f1":[]}
       metricsValid = {"accuracy":[], "precision":[], "recall":[], "f1":[]}
@@ -61,6 +63,7 @@ def learning_Curve(Xtrain, ytrain, pipeline, FOLDERNAME, train_sizes = np.linspa
 
 
       # Split across k folds
+      skf = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=42)
       for f, (trainInd, valInd) in enumerate(skf.split(Xsubset,ysubset),1):
         print(f"Fold {f}")
 
@@ -69,7 +72,7 @@ def learning_Curve(Xtrain, ytrain, pipeline, FOLDERNAME, train_sizes = np.linspa
         ytraintrain, yvalid = [ysubset[i] for i in trainInd], [ysubset[i] for i in valInd]
 
         # create new pipeline for each fold
-        text_clf = Pipeline(pipeline)
+        text_clf = Pipeline(deepcopy(pipeline))
 
         # train the model
         text_clf.fit(Xtraintrain, ytraintrain)
@@ -97,13 +100,25 @@ def learning_Curve(Xtrain, ytrain, pipeline, FOLDERNAME, train_sizes = np.linspa
     plt.figure(figsize=(12,8))
 
     for metric in metricsTrain.keys():
-      plt.plot(train_sizes, allMetricsTrain[metric], marker = 'o', linestyle = "--", label=f"Train {metric}")
-      plt.plot(train_sizes, allMetricsValid[metric], marker = 'x', label=f"Valid {metric}")
+      positions = range(len(train_sizes))
+      labels = [f"{int(train_sizes[i]*100)}% ({sizes[i]//1000}k)" for i in range(len(train_sizes))]
+
+      plt.xticks(positions, labels, rotation=45)
+
+      plt.plot(labels, allMetricsTrain[metric], marker = 'o', linestyle = "--", label=f"Train {metric}")
+      plt.plot(labels, allMetricsValid[metric], marker = 'x', label=f"Valid {metric}")
+      for x, y in zip(labels, allMetricsTrain[metric]):
+        plt.text(x, y, f"{y:.3f}", ha='center', va='bottom', fontsize=8, color='blue')
+    
+    # Add labels to each point for validation scores
+      for x, y in zip(labels, allMetricsValid[metric]):
+          plt.text(x, y, f"{y:.3f}", ha='center', va='top', fontsize=8, color='orange')
       plt.xlabel('Training Set Size')
       plt.ylabel('Score')
-      plt.title(f'Training vs Validation {metric}-score per dataset size')
+      plt.title(f'Training vs Validation {metric[:3]}-score by data size; {FOLDERNAME}')
       plt.ylim(0, 1.05)
-      plt.xticks(train_sizes)
+      
+      plt.tight_layout()
       plt.legend()
       plt.grid(True)
 
@@ -147,7 +162,7 @@ def trainWithMetrics(Xtrain,ytrain,Xtest,ytest,pipeline, FOLDERNAME):
   plt.ylim([0.0, 1.05])
   plt.xlabel('False Positive Rate')
   plt.ylabel('True Positive Rate')
-  plt.title('Receiver Operating Characteristic (ROC) Curve')
+  plt.title(f'Receiver Operating Characteristic (ROC) Curve; {FOLDERNAME}')
   plt.legend(loc='lower right')
   plt.grid(True)
 
@@ -178,6 +193,28 @@ def pipelineAllMetrics(Xtrain,ytrain,Xtest,ytest,pipeline,FOLDERNAME, training_s
 
   print("Getting training metrics")
   return trainWithMetrics(Xtrain,ytrain,Xtest,ytest,pipeline,FOLDERNAME)
+
+# VADER SENTIMENT ANALYSIS MODEL ---------------------------------------------------------------
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
+from sklearn.base import BaseEstimator,TransformerMixin
+
+# create Transformer out of VADER's text-sentiment analyzer that uses the `polarity_scores` functions as attributes
+class VADERTransformer(BaseEstimator, TransformerMixin):
+    def __init__(self):
+        self.analyzer = SentimentIntensityAnalyzer()
+    
+    def fit(self, X, y=None):
+        # Nothing to train on!
+        return self
+    
+    # Function that outputs attributes and features
+    def transform(self, X):
+        # X: 1D array of strings.
+        scores = []
+        for x in X:
+            polarities = self.analyzer.polarity_scores(x)
+            scores.append([polarities[key] for key in ['pos','neg','neu','compound']])
+        return np.array(scores)
 
     
 
