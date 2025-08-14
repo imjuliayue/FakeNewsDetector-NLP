@@ -39,7 +39,12 @@ def cleanData(X, y):
 
 x_filtered,y_filtered = cleanData(X_train, y_train)
 
+x_filtered = [x.strip('"') for x in x_filtered]
+
 x_testfiltered,y_testfiltered = cleanData(X_test,y_test)
+
+x_testfiltered = [x.strip('"') for x in x_testfiltered]
+
 
 # Save the split datasets to CSV files
 saveData("data/Vader", "X_train", [[str(xi)] for xi in x_filtered])

@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import re
 from sklearn.model_selection import StratifiedKFold
+from sklearn.base import clone
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, roc_curve, confusion_matrix
@@ -68,7 +69,7 @@ def learning_Curve(Xtrain, ytrain, pipeline, FOLDERNAME, train_sizes = np.linspa
         ytraintrain, yvalid = [ysubset[i] for i in trainInd], [ysubset[i] for i in valInd]
 
         # create new pipeline for each fold
-        text_clf = Pipeline([(name, deepcopy(model)) for (name, model) in pipeline])
+        text_clf = clone(pipeline)
 
         # train the model
         text_clf.fit(Xtraintrain, ytraintrain)
@@ -221,7 +222,7 @@ class TextMetadataTransformer(BaseEstimator, TransformerMixin):
   def fit(self, X, y=None):
       for x in X:
         parts = re.split(r'ARTICLE_TITLE\s|\sARTICLE_BODY\s|\sARTICLE_SUBJECT\s',x)
-        parts = [l for l in parts if l != ""]
+        parts = [l for l in parts if l != "" and l != '"']
         subject = parts[2]
         if(subject not in self.dic):
            self.dic[subject] = self.numSubject
@@ -233,7 +234,7 @@ class TextMetadataTransformer(BaseEstimator, TransformerMixin):
     features = []
     for x in X:
       parts = re.split(r'\sARTICLE_TITLE\s|\sARTICLE_BODY\s|\sARTICLE_SUBJECT\s',x)
-      parts = [l for l in parts if l != ""]
+      parts = [l for l in parts if l != ""and l != '"']
       title = parts[0]
       body = parts[1]
       subject = parts[2]

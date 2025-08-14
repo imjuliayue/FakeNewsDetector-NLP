@@ -27,6 +27,6 @@ ytest = [int(y) for y in ytest]
 
 # Logistic Regression
 from sklearn.linear_model import LogisticRegression
-pipeline = [("VADERSentiments", VADERTransformer()),("LogisticRegr",LogisticRegression())]
+pipeline = Pipeline([("VADERSentiments", VADERTransformer()),("LogisticRegr",LogisticRegression())])
 
 pipelineAllMetrics(Xtrain,ytrain,Xtest,ytest,pipeline,"LogisticRegression/Sentiment",n_splits=3)

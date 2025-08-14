@@ -15,15 +15,14 @@ from sklearn.pipeline import FeatureUnion,Pipeline
 from sklearn.linear_model import LogisticRegression
 
 # CONSTRUCT THE UNION OF THE TWO BADLY-PERFORMING FEATURES
-sentimentPipeline = [("VADERSentiments", VADERTransformer())]
+sentimentPipeline = Pipeline([("VADERSentiments", VADERTransformer())])
 
-textMetadataPipeline = [("Metadata", TextMetadataTransformer)]
+textMetadataPipeline = Pipeline([("Metadata", TextMetadataTransformer())])
 
 sentimentMetaUnion = FeatureUnion([("Sentiment",sentimentPipeline),("Metadata",textMetadataPipeline)])
 
 
 # Logistic Regression
-
-pipeline = Pipeline([("sentMetaUnion",sentimentMetaUnion),("LogReg",LogisticRegression)])
+pipeline = Pipeline([("sentMetaUnion",sentimentMetaUnion),("LogReg",LogisticRegression())])
 
 print(pipelineAllMetrics(Xtrain,ytrain,Xtest,ytest,pipeline,"LogisticRegression/Union",n_splits=3))
