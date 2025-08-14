@@ -15,6 +15,7 @@ nltk.download('vader_lexicon')
 # Load in the data
 print("loading data...")
 Xtrain = loadDataUTF8("data/Vader", "X_train")
+print(Xtrain[0])
 ytrain = loadData("data/Vader", "y_train")
 Xtest = loadDataUTF8("data/Vader", "X_test")
 ytest = loadData("data/Vader", "y_test")

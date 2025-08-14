@@ -8,6 +8,7 @@ from sklearn.base import clone
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, roc_curve, confusion_matrix
+import unicodedata
 import pickle as pkl
 from copy import deepcopy
 
@@ -23,9 +24,8 @@ def loadDataUTF8(path, name):
   # path is the path to load the data from (can include '../'), W.R.T. WHERE RUNNING SCRIPT
   # name is the name of the file to load
   # returns a list of lists, each list is [name, descr1, descr2, ...]
-  with open(f'{path}/{name}.csv', 'r',encoding='utf-8') as f:
-      reader = csv.reader(f)
-      return [row[0] for row in reader if row]
+  with open(f'{path}/{name}.csv', 'r',newline="", encoding='utf-8') as f:
+      return [line.strip() for line in f if line.strip()]
   
 def savePkl(FOLDERNAME, FILENAME, DATA):
     # PATHWAY IS W.R.T. WHERE RUNNING SCRIPT
@@ -212,6 +212,11 @@ class VADERTransformer(BaseEstimator, TransformerMixin):
             polarities = self.analyzer.polarity_scores(x)
             scores.append([polarities[key] for key in ['pos','neg','neu','compound']])
         return np.array(scores)
+    
+def normalize_text(s):
+    s = unicodedata.normalize("NFKC", s)  # normalize unicode forms
+    s = s.replace("\u00A0", " ")          # replace non-breaking spaces
+    return s
 
 class TextMetadataTransformer(BaseEstimator, TransformerMixin):
   def __init__(self):
@@ -221,8 +226,9 @@ class TextMetadataTransformer(BaseEstimator, TransformerMixin):
   
   def fit(self, X, y=None):
       for x in X:
+        x = x.strip('"')
         parts = re.split(r'ARTICLE_TITLE\s|\sARTICLE_BODY\s|\sARTICLE_SUBJECT\s',x)
-        parts = [l for l in parts if l != "" and l != '"']
+        parts = [l for l in parts if l != ""]
         subject = parts[2]
         if(subject not in self.dic):
            self.dic[subject] = self.numSubject
@@ -233,8 +239,9 @@ class TextMetadataTransformer(BaseEstimator, TransformerMixin):
   def transform(self, X):
     features = []
     for x in X:
+      x = x.strip('"')
       parts = re.split(r'\sARTICLE_TITLE\s|\sARTICLE_BODY\s|\sARTICLE_SUBJECT\s',x)
-      parts = [l for l in parts if l != ""and l != '"']
+      parts = [l for l in parts if l != ""]
       title = parts[0]
       body = parts[1]
       subject = parts[2]
