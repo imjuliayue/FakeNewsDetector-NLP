@@ -23,6 +23,6 @@ sentimentMetaUnion = FeatureUnion([("Sentiment",sentimentPipeline),("Metadata",t
 
 
 # Logistic Regression
-pipeline = Pipeline([("sentMetaUnion",sentimentMetaUnion),("LogReg",LogisticRegression())])
+pipeline = Pipeline([("sentMetaUnion",sentimentMetaUnion),("LogReg",LogisticRegression(max_iter=1000))])
 
 print(pipelineAllMetrics(Xtrain,ytrain,Xtest,ytest,pipeline,"LogisticRegression/Union",n_splits=3))

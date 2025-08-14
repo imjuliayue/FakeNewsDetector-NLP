@@ -8,10 +8,10 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 
 # Load in the data
 print("loading data...")
-Xtrain = loadData("data", "X_trainC")
-ytrain = loadData("data", "y_trainC")
-Xtest = loadData("data", "X_testC")
-ytest = loadData("data", "y_testC")
+Xtrain = loadDataUTF8("data/Vader", "X_train")
+ytrain = loadData("data/Vader", "y_train")
+Xtest = loadDataUTF8("data/Vader", "X_test")
+ytest = loadData("data/Vader", "y_test")
 
 # COUNT VECTORIZER ----------------------------------------------
 # breaks down text into tokens, builds vocabulary (fit)
@@ -35,14 +35,14 @@ X_train_tfidf = tfidf_transformer.fit_transform(X_train_counts)
 # LOGISTIC REGRESSION -----------------------------------------
 from sklearn.linear_model import LogisticRegression
 
-pipeline = [("tfidf", TfidfVectorizer()),("logistic", LogisticRegression())]
+pipeline = Pipeline([("tfidf", TfidfVectorizer()),("logistic", LogisticRegression())])
 
 # Expects labels to be int
 ytrain = [int(x) for x in ytrain]
 ytest = [int(x) for x in ytest]
 
 # OBTAIN ALL METRICS FOR THE LOGISTIC MODEL.
-pipelineAllMetrics(Xtrain,ytrain,Xtest,ytest,pipeline,"LogisticRegression/BOW",n_splits=3)
+pipelineAllMetrics(Xtrain,ytrain,Xtest,ytest,pipeline,"LogisticRegression/BOWVader",n_splits=3)
 
 # LINEAR SVC -------------------------------------------------------------
 from sklearn.svm import LinearSVC
