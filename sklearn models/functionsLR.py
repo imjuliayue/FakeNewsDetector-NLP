@@ -128,7 +128,7 @@ def learning_Curve(Xtrain, ytrain, pipeline, FOLDERNAME, train_sizes = np.linspa
     
 def trainWithMetrics(Xtrain,ytrain,Xtest,ytest,pipeline, FOLDERNAME):
   # create pipeline
-  text_clf = Pipeline(pipeline)
+  text_clf = clone(pipeline)
 
   # simple fitting 
   # train the data
@@ -194,23 +194,29 @@ def pipelineAllMetrics(Xtrain,ytrain,Xtest,ytest,pipeline,FOLDERNAME, training_s
 # CUSTOM PIPELINE MODELS ---------------------------------------------------------------
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from sklearn.base import BaseEstimator,TransformerMixin
+from joblib import Parallel, delayed
 
 # create Transformer out of VADER's text-sentiment analyzer that uses the `polarity_scores` functions as attributes
 class VADERTransformer(BaseEstimator, TransformerMixin):
-    def __init__(self):
+    def __init__(self, jobs = -1):
         self.analyzer = SentimentIntensityAnalyzer()
+        self.jobs = jobs
     
     def fit(self, X, y=None):
         # Nothing to train on!
         return self
     
+    def _compute_scores(self, x):
+       polarities = self.analyzer.polarity_scores(x)
+       return [polarities[key] for key in ['pos','neg','neu','compound']]
+    
     # Function that outputs attributes and features
     def transform(self, X):
         # X: 1D array of strings.
-        scores = []
-        for x in X:
-            polarities = self.analyzer.polarity_scores(x)
-            scores.append([polarities[key] for key in ['pos','neg','neu','compound']])
+        # DO IN PARALLEL DUE TO HOW SLOW THIS IS
+        scores = Parallel(n_jobs=self.jobs)(
+           delayed(self._compute_scores)(x) for x in X
+        )
         return np.array(scores)
     
 def normalize_text(s):
